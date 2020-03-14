@@ -18,8 +18,8 @@ clean:
 
 # Link
 
-bin/pong.nes: ./helpers/link.x $(objs)
-	ld65 -C ./helpers/link.x $(objs) -o $@
+bin/pong.nes: ./helpers/link.ld $(objs)
+	ld65 -C ./helpers/link.ld $(objs) -o $@
 
 # Run 
 

@@ -1,4 +1,4 @@
- ; PPU registers.
+; PPU registers.
 PPUCTRL		= $2000
 PPUMASK		= $2001
 PPUSTATUS	= $2002
