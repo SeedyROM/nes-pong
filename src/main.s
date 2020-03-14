@@ -40,14 +40,17 @@ forever:
 
 	; PPU warmup, wait two frames, plus a third later.
 	; http://forums.nesdev.com/viewtopic.php?f=2&t=3958
-:	bit PPUSTATUS
-	bpl :-
-:	bit PPUSTATUS
-	bpl :-
+PPU1:	
+	bit PPUSTATUS
+	bpl PPU1
+PPU2:	
+	bit PPUSTATUS
+	bpl PPU2
 
 	; Zero ram.
 	txa
-:	sta $000, x
+zero:	
+	sta $000, x
 	sta $100, x
 	sta $200, x
 	sta $300, x
@@ -56,11 +59,11 @@ forever:
 	sta $600, x
 	sta $700, x
 	inx
-	bne :-
+	bne zero
 
 	; Final wait for PPU warmup.
-:	bit PPUSTATUS
-	bpl :-
+final:	bit PPUSTATUS
+	bpl final
 
 	jsr main
 .endproc
