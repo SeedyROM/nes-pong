@@ -2,8 +2,10 @@
 ; ------------------------------- Hello World --------------------------------
 ; ----------------------------------------------------------------------------
 
+; Include some helpful constants
 .include "constants.s"
 
+; Start the code for our program, no .org needed!
 .code
 
 ; ----------------------------------------------------------------------------
@@ -64,18 +66,19 @@ zero_ram:
 	bne zero_ram		; Hows does BNE do anything here???
 
 	; Final wait for PPU warmup.
-final:	bit PPUSTATUS		; Test the PPU status after the RAM is zeroed
-	bpl final		; Same as before
+finish:	bit PPUSTATUS		; Test the PPU status after the RAM is zeroed
+	bpl finish		; Same as before
 
-	jsr main
+	jsr main		; Jump into the main game loop
 .endproc
 
 ; ----------------------------------------------------------------------------
-; Reset handler
+; Reset / start handler
+; When the machine starts up the reset interrupt is called and thus our 
+; setup and main subroutines get run.
 ; ----------------------------------------------------------------------------
 
 .proc reset
-	; Setup the hardware
 	jsr setup
 .endproc
 
