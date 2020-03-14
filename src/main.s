@@ -21,6 +21,9 @@
 	lda #$bf		; volume
 	sta $4000
 forever:
+	stx 0
+	inx 			; Increment the pitch
+	stx $4002		; Set the pitch to the value in register a
 	jmp forever
 .endproc
 
@@ -40,17 +43,16 @@ forever:
 
 	; PPU warmup, wait two frames, plus a third later.
 	; http://forums.nesdev.com/viewtopic.php?f=2&t=3958
-PPU1:	
-	bit PPUSTATUS
-	bpl PPU1
-PPU2:	
-	bit PPUSTATUS
-	bpl PPU2
+PPU1:	bit PPUSTATUS		; Test the PPU status
+	bpl PPU1      		; Jump back if PPUStatus is 0 or negative
+PPU2:	bit PPUSTATUS		; Test the PPU Status again
+	bpl PPU2		; Same idea from before
 
-	; Zero ram.
-	txa
-zero:	
-	sta $000, x
+	; Zero ram (not sure how this works yet)
+	txa			; Transfer X to A
+	stx 0			; Explicitly initialize x to a 0 immediate value
+zero_ram:
+	sta $000, x		; Block magic? (TODO: Understand this better)
 	sta $100, x
 	sta $200, x
 	sta $300, x
@@ -58,12 +60,12 @@ zero:
 	sta $500, x
 	sta $600, x
 	sta $700, x
-	inx
-	bne zero
+	inx			; Increment x
+	bne zero_ram		; Hows does BNE do anything here???
 
 	; Final wait for PPU warmup.
-final:	bit PPUSTATUS
-	bpl final
+final:	bit PPUSTATUS		; Test the PPU status after the RAM is zeroed
+	bpl final		; Same as before
 
 	jsr main
 .endproc
