@@ -25,7 +25,7 @@
 forever:
 	stx 0
 	inx 			; Increment the pitch
-	stx $4002		; Set the pitch to the value in register a
+	stx $4002		; Set the pitch to the value in register x
 	jmp forever
 .endproc
 
@@ -51,18 +51,18 @@ PPU2:	bit PPUSTATUS		; Test the PPU Status again
 	bpl PPU2		; Same idea from before
 
 	; Zero ram (not sure how this works yet)
-	txa			; Transfer X to A
-	stx 0			; Explicitly initialize x to a 0 immediate value
+	txa			; Transfer X's current value to A
+	stx 0			; Explicitly initialize X to a 0 immediate value
 zero_ram:
-	sta $000, x		; Block magic? (TODO: Understand this better)
-	sta $100, x
+	sta $000, x		; Iterate X until it wraps back around to 0
+	sta $100, x		; AKA Clear from $0000, $07FF
 	sta $200, x
 	sta $300, x
 	sta $400, x
 	sta $500, x
 	sta $600, x
 	sta $700, x
-	inx			; Increment x
+	inx
 	bne zero_ram		; Hows does BNE do anything here???
 
 	; Final wait for PPU warmup.
