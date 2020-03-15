@@ -22,6 +22,9 @@
 ; Main Routine
 ; ----------------------------------------------------------------------------
 
+counter 	= $00
+counter2 	= $01
+
 .proc main
 	; Play audio forever.
 	lda #$01		; Enable pulse channel 1
@@ -33,10 +36,18 @@
 	lda #$02		; Set the duration?
 	sta APU_PULSE1_SWEEP
 
-	lda #$af		; Set the volume
+	lda #%11100000		; Set the volume
 	sta $4000
+
+	ldx #$00		; Setup our counter for pitch
 forever:
-	jmp forever
+	stx APU_PULSE1_ENVELOPE ; Set the pitch to 0
+loop:	
+	inc counter		; Increment the counter variable by 1
+	cmp counter		; 
+	bne loop		; See if the counter has wrapped to 0
+	inx			; Increment the counter, which changes the pitch
+	jmp forever		; Start again
 .endproc
 
 ; ----------------------------------------------------------------------------
