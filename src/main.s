@@ -9,23 +9,33 @@
 .code
 
 ; ----------------------------------------------------------------------------
+; Data Structures
+; ----------------------------------------------------------------------------
+
+.struct Player
+	x_position 	.word
+	y_position 	.word
+	score      	.word
+.endstruct
+
+; ----------------------------------------------------------------------------
 ; Main Routine
 ; ----------------------------------------------------------------------------
 
 .proc main
 	; Play audio forever.
-	lda #$01		; enable pulse 1
-	sta APUSTATUS
-	lda #$05		; period
-	sta $4002
-	lda #$02
-	sta $4003
-	lda #$bf		; volume
+	lda #$01		; Enable pulse channel 1
+	sta APU_STATUS
+
+	lda #$05		; Set the period / frequency
+	sta APU_PULSE1_ENVELOPE
+
+	lda #$02		; Set the duration?
+	sta APU_PULSE1_SWEEP
+
+	lda #$af		; Set the volume
 	sta $4000
 forever:
-	stx 0
-	inx 			; Increment the pitch
-	stx $4002		; Set the pitch to the value in register x
 	jmp forever
 .endproc
 
@@ -39,20 +49,19 @@ forever:
 	ldx #$ff
 	txs			; Initialize SP = $FF
 	inx
-	stx PPUCTRL		; PPUCTRL = 0
-	stx PPUMASK		; PPUMASK = 0
-	stx APUSTATUS		; APUSTATUS = 0
+	stx PPU_CONTROL		; PPU_CONTROL = 0
+	stx PPU_MASK_BITS		; PPU_MASK_BITS = 0
+	stx APU_STATUS		; APU_STATUS = 0
 
 	; PPU warmup, wait two frames, plus a third later.
 	; http://forums.nesdev.com/viewtopic.php?f=2&t=3958
-PPU1:	bit PPUSTATUS		; Test the PPU status
-	bpl PPU1      		; Jump back if PPUStatus is 0 or negative
-PPU2:	bit PPUSTATUS		; Test the PPU Status again
+PPU1:	bit PPU_STATUS		; Test the PPU status
+	bpl PPU1      		; Jump back if PPU_STATUS is 0 or negative
+PPU2:	bit PPU_STATUS		; Test the PPU Status again
 	bpl PPU2		; Same idea from before
 
 	; Zero ram (not sure how this works yet)
-	txa			; Transfer X's current value to A
-	stx 0			; Explicitly initialize X to a 0 immediate value
+	ldx #$00		; Explicitly initialize X to a 0 immediate value
 zero_ram:
 	sta $000, x		; Iterate X until it wraps back around to 0
 	sta $100, x		; AKA Clear from $0000, $07FF
@@ -63,10 +72,11 @@ zero_ram:
 	sta $600, x
 	sta $700, x
 	inx
+	cpx #$00		; Iterate until overflow
 	bne zero_ram		; Hows does BNE do anything here???
 
 	; Final wait for PPU warmup.
-finish:	bit PPUSTATUS		; Test the PPU status after the RAM is zeroed
+finish:	bit PPU_STATUS		; Test the PPU status after the RAM is zeroed
 	bpl finish		; Same as before
 
 	jsr main		; Jump into the main game loop
